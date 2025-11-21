@@ -53,6 +53,7 @@ def generate(client, parameters, progress_callback):
         progress_callback(progress, total)
 
     if total > 0:
+        subscriptions = _get_subscriptions(client, parameters)
         for record in records:
             param1 = '-'
             param2 = '-'
@@ -89,9 +90,16 @@ def generate(client, parameters, progress_callback):
                     msrp = 0
                     price = get_basic_value(record, 'amount')
 
-            sphs_tenant_id = ''
-            if get_basic_value(record, 'sphs_tenant_id'):
-                sphs_tenant_id = get_basic_value(record, 'sphs_tenant_id')
+            sphs_tenant_id = "NA"
+            for subscription in subscriptions:
+                # check subscription id from subscription details list is matching with subscription id / asset id of usage details list
+                if get_basic_value(subscription, 'id') == get_basic_value(record, 'asset_id'):
+                    for param in subscription['params']:
+                        if 'sphs_tenant_id' == get_basic_value(param, 'name'):
+                            sphs_tenant_id = get_basic_value(param, 'value')
+
+                            break
+                    break
 
             yield (
                 sphs_tenant_id,  # Sophos Tenant ID
@@ -150,3 +158,25 @@ def _get_usage_records(client, parameters):
         query &= R().hub.id.oneof(parameters['hub'].split(sep="|"))
 
     return client.ns('usage').collection('records').filter(query)
+
+
+def _get_subscriptions(client, parameters):
+    subs_types = ['active', 'suspended', 'terminating', 'terminated', 'draft']
+
+    query = R()
+    query &= R().status.oneof(subs_types)
+    query &= R().events.created.at.ge(parameters['date']['after'])
+    query &= R().events.created.at.le(parameters['date']['before'])
+
+    if parameters.get('connexion_type') and parameters['connexion_type']['all'] is False:
+        query &= R().connection.type.oneof(parameters['connexion_type']['choices'])
+
+    if parameters.get('product') and parameters['product']['all'] is False:
+        query &= R().product.id.oneof(parameters['product']['choices'])
+    if parameters.get('mkp') and parameters['mkp']['all'] is False:
+        query &= R().marketplace.id.oneof(parameters['mkp']['choices'])
+
+    # if 'provider_to_exclude' in parameters and len(parameters['provider_to_exclude'].split(sep="|")) > 0:
+    #    query &= R().connection.provider.id.out(parameters['provider_to_exclude'].split(sep="|"))
+
+    return client.ns('subscriptions').assets.filter(query)
