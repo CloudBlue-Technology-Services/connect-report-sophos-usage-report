@@ -6,7 +6,7 @@
 
 
 from cnct import R
-from reports.subscriptions_report.utils import convert_to_datetime, get_basic_value, get_value, today_str, \
+from reports.usage_records_report.utils import convert_to_datetime, get_basic_value, get_value, today_str, \
         get_usage_record_param_value
 
 HEADERS = ['Sophos Tenant ID', 'Subscription ID', 'Subscription External ID', 'Status',
