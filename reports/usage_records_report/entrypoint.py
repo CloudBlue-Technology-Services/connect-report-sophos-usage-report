@@ -9,7 +9,7 @@ from cnct import R
 from reports.usage_records_report.utils import convert_to_datetime, get_basic_value, get_value, today_str, \
         get_usage_record_param_value
 
-HEADERS = ['Sophos Tenant ID', 'Subscription ID', 'Subscription External ID', 'Status',
+HEADERS = ['Start Date', 'Sophos Tenant ID', 'Subscription ID', 'Subscription External ID', 'Status',
            'Item ID', 'Item Name', 'Item MPN', 'Quantity', 'MSRP', 'Cost', 'Price',
            'Product ID', 'Currency', 'Schema', 'Start Date', 'End Date', 'to_exchange_rate_by_config',
            'to_exchange_rate', 'from_exchange_rate_by_config', 'from_exchange_rate', 'entitlement_id',
@@ -102,6 +102,7 @@ def generate(client, parameters, progress_callback):
                     break
 
             yield (
+                parameters['date']['after'],
                 sphs_tenant_id,  # Sophos Tenant ID
                 get_basic_value(record, 'asset_id'),  # Subscription ID
                 get_basic_value(record, 'asset_external_id'),  # Subscription External ID
