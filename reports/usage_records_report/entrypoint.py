@@ -9,7 +9,7 @@ from cnct import R
 from reports.usage_records_report.utils import convert_to_datetime, get_basic_value, get_value, today_str, \
         get_usage_record_param_value
 
-HEADERS = ['Start Date', 'Sophos Tenant ID', 'Subscription ID', 'Subscription External ID', 'Status',
+HEADERS = ['Sophos Tenant ID', 'Subscription ID', 'Subscription External ID', 'Status',
            'Item ID', 'Item Name', 'Item MPN', 'Quantity', 'MSRP', 'Cost', 'Price',
            'Product ID', 'Currency', 'Schema', 'Start Date', 'End Date', 'to_exchange_rate_by_config',
            'to_exchange_rate', 'from_exchange_rate_by_config', 'from_exchange_rate', 'entitlement_id',
@@ -102,7 +102,6 @@ def generate(client, parameters, progress_callback):
                     break
 
             yield (
-                parameters['date']['after'],
                 sphs_tenant_id,  # Sophos Tenant ID
                 get_basic_value(record, 'asset_id'),  # Subscription ID
                 get_basic_value(record, 'asset_external_id'),  # Subscription External ID
@@ -166,6 +165,8 @@ def _get_subscriptions(client, parameters):
 
     query = R()
     query &= R().status.oneof(subs_types)
+    query &= R().events.created.at.ge('2023-12-31T00:00:00Z')
+    # query &= R().events.created.at.le(parameters['date']['before'])
 
     if parameters.get('connexion_type') and parameters['connexion_type']['all'] is False:
         query &= R().connection.type.oneof(parameters['connexion_type']['choices'])
