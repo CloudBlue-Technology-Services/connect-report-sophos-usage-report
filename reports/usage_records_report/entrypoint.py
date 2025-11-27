@@ -94,11 +94,13 @@ def generate(client, parameters, progress_callback):
             for subscription in subscriptions:
                 # check subscription id from subscription details list is matching with subscription id / asset id of usage details list
                 if get_basic_value(subscription, 'id') == get_basic_value(record, 'asset_id'):
+                    flag = False
                     for param in subscription['params']:
                         if 'sphs_tenant_id' == get_basic_value(param, 'name'):
                             sphs_tenant_id = get_basic_value(param, 'value')
-
+                            flag = True
                             break
+                    sphs_tenant_id = get_basic_value(subscription, 'id') if not flag else sphs_tenant_id
                     break
 
             yield (
