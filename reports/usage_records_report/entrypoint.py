@@ -165,8 +165,6 @@ def _get_subscriptions(client, parameters):
 
     query = R()
     query &= R().status.oneof(subs_types)
-    query &= R().events.created.at.ge(parameters['date']['after'])
-    query &= R().events.created.at.le(parameters['date']['before'])
 
     if parameters.get('connexion_type') and parameters['connexion_type']['all'] is False:
         query &= R().connection.type.oneof(parameters['connexion_type']['choices'])
